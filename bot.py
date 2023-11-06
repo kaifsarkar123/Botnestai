@@ -84,6 +84,28 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"[e] {e}")
             await message.edit_text(f"❌ Error orrurred: {e}. /reset")
 
+else:  # Bard
+        # Check if the message contains an image
+        if update.message.photo:
+            # Download the image
+            file_id = update.message.photo[-1].file_id
+            file = await update.message.bot.get_file(file_id)
+            image_url = file.file_path
+
+            # Add code to download the image here
+            image_bytes = requests.get(image_url, timeout=120).content
+
+            # Use the image in the Bard chatbot interaction
+            response = await session.send_message(input_text, image=image_bytes)
+        else:
+            # Handle the case when no image is provided
+            response = await session.send_message(input_text)
+
+        # Add code to process the Bard response and update the message accordingly
+        # The response variable contains the Bard's reply
+        # Update the message with the Bard's response
+        await message.edit_text(response)
+
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
