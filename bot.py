@@ -83,6 +83,7 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             print(f"[e] {e}")
             await message.edit_text(f"❌ Error orrurred: {e}. /reset")
+        
         else:  # Bard
         # Check if the message contains an image
         if update.message.photo:
