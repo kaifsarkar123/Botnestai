@@ -83,23 +83,6 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             print(f"[e] {e}")
             await message.edit_text(f"❌ Error orrurred: {e}. /reset")
-        
-        else:
-            if update.message.photo:
-            file_id = update.message.photo[-1].file_id
-            file = await update.message.bot.get_file(file_id)
-            image_url = file.file_path
-
-            image_bytes = requests.get(image_url, timeout=120).content
-            
-            response = await session.send_message(input_text, image=image_bytes)
-        else:
-    response = await session.send_message(input_text)
-
-        # Add code to process the Bard response and update the message accordingly
-        # The response variable contains the Bard's reply
-        # Update the message with the Bard's response
-        await message.edit_text(response)
 
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
