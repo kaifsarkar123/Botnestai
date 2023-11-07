@@ -377,7 +377,7 @@ def run_bot():
         .build()
     )
 
-    user_filter = filters.Chat(chat_id=user_ids)
+    user_filter = filters.Chat()
     msg_filter = filters.TEXT
 
     handler_list = [
