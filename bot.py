@@ -152,7 +152,6 @@ for _ in range(2):
     await asyncio.sleep(0.5)  # Adjust sleep duration as needed
     current_text = (await message.edit_text(message.text + "⠏")).text
     await asyncio.sleep(0.5)  # Adjust sleep duration as needed
-
     context.chat_data[mode]["last_input"] = input_text
     context.chat_data[mode]["last_msg_id"] = message.message_id
 
