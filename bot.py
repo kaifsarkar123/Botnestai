@@ -131,7 +131,28 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if input_text == "":
         return await update.message.reply_text("❌ Empty message.")
-    message = await update.message.reply_text("Thinking...")
+    message = await update.message.reply_text("⠋")  # Initial dot
+for _ in range(2):
+    await asyncio.sleep(0.5)  # Adjust sleep duration as needed
+    current_text = (await message.edit_text(message.text + "⠙")).text
+    await asyncio.sleep(0.5)  # Adjust sleep duration as needed
+    current_text = (await message.edit_text(message.text + "⠹")).text
+    await asyncio.sleep(0.5)  # Adjust sleep duration as needed
+    current_text = (await message.edit_text(message.text + "⠸")).text
+    await asyncio.sleep(0.5)  # Adjust sleep duration as needed
+    current_text = (await message.edit_text(message.text + "⠼")).text
+    await asyncio.sleep(0.5)  # Adjust sleep duration as needed
+    current_text = (await message.edit_text(message.text + "⠴")).text
+    await asyncio.sleep(0.5)  # Adjust sleep duration as needed
+    current_text = (await message.edit_text(message.text + "⠦")).text
+    await asyncio.sleep(0.5)  # Adjust sleep duration as needed
+    current_text = (await message.edit_text(message.text + "⠧")).text
+    await asyncio.sleep(0.5)  # Adjust sleep duration as needed
+    current_text = (await message.edit_text(message.text + "⠇")).text
+    await asyncio.sleep(0.5)  # Adjust sleep duration as needed
+    current_text = (await message.edit_text(message.text + "⠏")).text
+    await asyncio.sleep(0.5)  # Adjust sleep duration as needed
+
     context.chat_data[mode]["last_input"] = input_text
     context.chat_data[mode]["last_msg_id"] = message.message_id
 
