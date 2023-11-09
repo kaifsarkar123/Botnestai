@@ -1,5 +1,6 @@
 from re import sub
 from urllib.parse import quote
+from asyncio import sleep
 
 from telegram import (
     BotCommand,
