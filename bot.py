@@ -134,8 +134,6 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if input_text == "":
         return await update.message.reply_text("❌ Empty message.")
     message = await update.message.reply_text("◌ ◌ ◌")
-    try:
-        while True:
             for dot_sequence in ["● ◌ ◌", "● ● ◌", "● ● ●"]:
                 await asyncio.sleep(1)
                 await message.edit_text(dot_sequence)
