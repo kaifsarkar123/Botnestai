@@ -137,8 +137,6 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
             for dot_sequence in ["● ◌ ◌", "● ● ◌", "● ● ●"]:
                 await asyncio.sleep(1)
                 await message.edit_text(dot_sequence)
-    except asyncio.CancelledError:
-        pass
     context.chat_data[mode]["last_input"] = input_text
     context.chat_data[mode]["last_msg_id"] = message.message_id
 
