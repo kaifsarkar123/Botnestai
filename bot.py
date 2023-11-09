@@ -1,7 +1,5 @@
-import asyncio
 from re import sub
 from urllib.parse import quote
-from asyncio import sleep
 
 from telegram import (
     BotCommand,
@@ -133,10 +131,7 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if input_text == "":
         return await update.message.reply_text("❌ Empty message.")
-    message = await update.message.reply_text("◌ ◌ ◌")
-            for dot_sequence in ["● ◌ ◌", "● ● ◌", "● ● ●"]:
-                await asyncio.sleep(1)
-                await message.edit_text(dot_sequence)
+    message = await update.message.reply_sticker("🤔")
     context.chat_data[mode]["last_input"] = input_text
     context.chat_data[mode]["last_msg_id"] = message.message_id
 
