@@ -89,8 +89,6 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Send the remaining chunks without the buttons
         for chunk in chunks[1:]:
-            # Send typing action before each chunk
-            await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=ChatAction.TYPING)
             await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
 
     except Exception as e:
@@ -102,6 +100,18 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
+        # Send the remaining chunks without the buttons
+        for chunk in chunks[1:]:
+            await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+
+    except Exception as e:
+        if str(e).startswith("Message is not modified"):
+            pass
+        elif str(e).startswith("Can't parse entities"):
+            await message.reply_text(f"{truncated_response[:4095]}...")
+        else:
+            print(f"[e] {e}")
+            await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
