@@ -70,7 +70,7 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response_text = f"{_content}{_sources}"
 
     # Ensure the response is at least 1000 characters
-    if len(response_text) < 1000:
+    if len(response_text) < 40096:
         await message.edit_text(response_text, parse_mode=ParseMode.MARKDOWN_V2)
         return
 
