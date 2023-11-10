@@ -1,5 +1,8 @@
+import os
 from re import sub
 from urllib.parse import quote
+from telegram import Update
+from telegram.ext import ContextTypes
 
 from telegram import (
     BotCommand,
@@ -116,24 +119,24 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
+
 async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Check if the message contains a photo
-    if update.message.photo:
-        # Get the photo file ID and download the image
-        file_id = update.message.photo[-1].file_id
-        file = await context.bot.get_file(file_id)
-        image = BytesIO()
-        await file.download(out=image)
+    # Get the photo file ID
+    file_id = update.message.photo[-1].file_id
 
-        # Process the image using Bard
-        bard_answer = bard.ask_about_image('What is in the image?', image.getvalue())
-        response = bard_answer['content']
+    # Get the file path
+    file_path = await context.bot.get_file(file_id).download()
 
-        # Send the response back to the user
-        message = await update.message.reply_text(response)
+    # Read the image file
+    with open(file_path, 'rb') as image_file:
+        image = image_file.read()
 
-        # Store the message ID for potential future interaction
-        context.chat_data["last_msg_id"] = message.message_id
+    # Use Bard to analyze the image
+    bard_answer = bard.ask_about_image('What is in the image?', image)
+
+    # Send the Bard's answer as a text message
+    await update.message.reply_text(bard_answer['content'])
+
 
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
