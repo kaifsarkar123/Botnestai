@@ -1,8 +1,5 @@
-import requests
 from re import sub
 from urllib.parse import quote
-from telegram import Update
-from telegram.ext import ContextTypes
 
 from telegram import (
     BotCommand,
@@ -118,38 +115,6 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
-
-
-async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        # Assuming request_response is an object containing image_url and request attributes
-        request_response = ...
-
-        image_bytes = None
-        if request_response.image_url:
-            print("Downloading user image")
-            image_bytes = requests.get(request_response.image_url, timeout=120).content
-
-        # Ask Bard
-        print("Asking Bard...")
-        bard_response = self._chatbot.get_answer(request_response.request, image=image_bytes)
-
-        # Check response
-        if not bard_response or len(bard_response) < 1 or "content" not in bard_response:
-            raise Exception("Wrong Bard response!")
-
-        # Send Bard's response as a text message
-        await update.message.reply_text(bard_response["content"])
-
-    
-    except Exception as e:
-        print(f"Error handling image: {e}")
-        await update.message.reply_text("❌ Error occurred while processing the image. /reset")
-
-# Add the handler to your existing code
-handler_list.append(MessageHandler(Filters.PHOTO, handle_image))
-
-
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
