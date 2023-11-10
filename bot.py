@@ -59,6 +59,9 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message, markup, sources, choices, index = context.chat_data["Bard"]["drafts"].values()
     session.client.choice_id = choices[index]["id"]
     content = choices[index]["content"][0]
+    
+    content = re.sub(r'[*#/]', '', content)
+    
     _content = sub(
         r"[\_\*\[\]\(\)\~\>\#\+\-\=\|\{\}\.\!]", lambda x: f"\\{x.group(0)}", content
     ).replace("\\*\\*", "*")
