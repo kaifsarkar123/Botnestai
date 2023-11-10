@@ -56,9 +56,7 @@ async def view_other_drafts(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Google bard: response
 async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = context.chat_data["Bard"]["session"]
-    message, markup, sources, choices, index = context.chat_data["Bard"][
-        "drafts"
-    ].values()
+    message, markup, sources, choices, index = context.chat_data["Bard"]["drafts"].values()
     session.client.choice_id = choices[index]["id"]
     content = choices[index]["content"][0]
     _content = sub(
@@ -67,22 +65,39 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _sources = sub(
         r"[\_\*\[\]\(\)\~\`\>\#\+\-\=\|\{\}\.\!]", lambda x: f"\\{x.group(0)}", sources
     )
+
+    response_text = f"{_content[: 4096 - len(_sources)]}{_sources}"
+
+    # Split the response into messages with a maximum of 3000 characters
+    chunks = [response_text[i:i + 3000] for i in range(0, len(response_text), 3000)]
+
+    last_msg_id = None
+
     try:
-        await message.edit_text(
-            f"{_content[: 4096 - len(_sources)]}{_sources}",
-            reply_markup=markup,
-            parse_mode=ParseMode.MARKDOWN_V2,
-        )
+        for idx, chunk in enumerate(chunks[:-1]):  # Exclude the last chunk
+            if idx == len(chunks) - 2:  # Include buttons only in the last but one chunk
+                sent_message = await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+            else:
+                sent_message = await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+
+        # Send the last chunk with buttons
+        sent_message = await message.reply_text(chunks[-1], reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
+        last_msg_id = sent_message.message_id
+
+        # Update the last sent message ID in the chat data
+        context.chat_data["Bard"]["drafts"]["message"] = sent_message
+
     except Exception as e:
         if str(e).startswith("Message is not modified"):
             pass
         elif str(e).startswith("Can't parse entities"):
-            await message.edit_text(
-                f"{content[: 4095 - len(sources)]}.{sources}", reply_markup=markup
-            )
+            await message.reply_text(f"{response_text[:4095]}.")
         else:
             print(f"[e] {e}")
-            await message.edit_text(f"❌ Error orrurred: {e}. /reset")
+            await message.reply_text(f"❌ Error occurred: {e}. /reset")
+
+    # Update the last message ID in the chat data
+    context.chat_data["Bard"]["drafts"]["last_msg_id"] = last_msg_id
 
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
