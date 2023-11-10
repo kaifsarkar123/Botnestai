@@ -116,6 +116,26 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
+async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Check if the message contains a photo
+    if update.message.photo:
+        # Get the photo file ID and download the image
+        file_id = update.message.photo[-1].file_id
+        file = await context.bot.get_file(file_id)
+        image = BytesIO()
+        await file.download(out=image)
+
+        # Process the image using Bard
+        bard_answer = bard.ask_about_image('What is in the image?', image.getvalue())
+        response = bard_answer['content']
+
+        # Send the response back to the user
+        message = await update.message.reply_text(response)
+
+        # Store the message ID for potential future interaction
+        context.chat_data["last_msg_id"] = message.message_id
+
+
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
     if update.message.chat.type != "private":
