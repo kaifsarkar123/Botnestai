@@ -73,29 +73,30 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     last_msg_id = None
 
-    try:
-        # Update the emoji message with the first chunk
-        emoji_message = await message.edit_text(chunks[0], parse_mode=ParseMode.MARKDOWN_V2)
+try:
+    # Update the emoji message with the first chunk
+    emoji_message = await message.edit_text(chunks[0], parse_mode=ParseMode.MARKDOWN_V2)
 
-        for chunk in chunks[1:]:
-            # Send subsequent chunks as separate messages
-            sent_message = await message.reply_text(chunk, reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
-            last_msg_id = sent_message.message_id
+    for chunk in chunks[1:]:
+        # Send subsequent chunks as separate messages
+        sent_message = await message.reply_text(chunk, reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
+        last_msg_id = sent_message.message_id
 
-        # Update the last sent message ID in the chat data
-        context.chat_data["Bard"]["drafts"]["message"] = sent_message
+    # Update the last sent message ID in the chat data
+    context.chat_data["Bard"]["drafts"]["message"] = sent_message
 
-    except Exception as e:
-        if str(e).startswith("Message is not modified"):
-            pass
-        elif str(e).startswith("Can't parse entities"):
-            await message.reply_text(f"{response_text[:4095]}.")
-        else:
-            print(f"[e] {e}")
-            await message.reply_text(f"❌ Error occurred: {e}. /reset")
+except Exception as e:
+    if str(e).startswith("Message is not modified"):
+        pass
+    elif str(e).startswith("Can't parse entities"):
+        await emoji_message.edit_text(f"{response_text[:4095]}.")
+    else:
+        print(f"[e] {e}")
+        await emoji_message.edit_text(f"❌ Error occurred: {e}. /reset")
 
-    # Update the last message ID in the chat data
-    context.chat_data["Bard"]["drafts"]["last_msg_id"] = last_msg_id
+# Update the last message ID in the chat data
+context.chat_data["Bard"]["drafts"]["last_msg_id"] = last_msg_id
+
 
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
