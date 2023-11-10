@@ -1,5 +1,6 @@
 from re import sub
 from urllib.parse import quote
+from tempfile import NamedTemporaryFile
 
 from telegram import (
     BotCommand,
@@ -71,23 +72,36 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Split the response into messages with a maximum of 4000 characters
     chunks = [response_text[i:i + 3500] for i in range(0, len(response_text), 3500)]
 
-    try:
-        # Update the "Thinking..." message with the first chunk
-        await message.edit_text(chunks[0], parse_mode=ParseMode.MARKDOWN_V2)
+    last_msg_id = None
 
-        # Send the remaining chunks without the buttons
-        for chunk in chunks[1:]:
-            await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+    try:
+        for chunk in chunks[:-1]:  # Exclude the last chunk
+            await message.edit_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+
+        # Send the last chunk with buttons
+        await message.edit_text(chunks[-1], reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
+        
+        # Generate audio from the last chunk
+        audio_text = chunks[-1]
+        audio = bard.speech(audio_text)
+        
+        # Save audio to a temporary file
+        with NamedTemporaryFile(suffix=".ogg", delete=False) as audio_file:
+            audio_file.write(bytes(audio['audio']))
+
+        # Send the voice file along with the Listen button
+        listen_button = InlineKeyboardButton("🔊 Listen", callback_data=audio_file.name)
+        listen_markup = InlineKeyboardMarkup([[listen_button]])
+        await message.reply_audio(audio_file.name, reply_markup=listen_markup)
+
+        last_msg_id = message.message_id
 
     except Exception as e:
-        if str(e).startswith("Message is not modified"):
-            pass
-        elif str(e).startswith("Can't parse entities"):
-            await message.reply_text(f"{response_text[:4095]}.")
-        else:
-            print(f"[e] {e}")
-            await message.reply_text(f"❌ Error occurred: {e}. /reset")
+        print(f"[e] {e}")
+        await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
+    # Update the last message ID in the chat data
+    context.chat_data["Bard"]["drafts"]["last_msg_id"] = last_msg_id
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
