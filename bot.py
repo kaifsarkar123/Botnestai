@@ -1,4 +1,4 @@
-import os
+import requests
 from re import sub
 from urllib.parse import quote
 from telegram import Update
