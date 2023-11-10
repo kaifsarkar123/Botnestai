@@ -77,14 +77,8 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for chunk in chunks[:-1]:  # Exclude the last chunk
             sent_message = await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
 
-        # Check if the last chunk fits within the character limit of the second message
-        if len(chunks[-1]) > 4096:
-            # Send the last chunk with buttons in a separate message
-            sent_message = await message.reply_text(chunks[-1], reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
-        else:
-            # Send the last chunk with buttons in the third message
-            sent_message = await message.reply_text("", reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
-
+        # Send the last chunk with buttons
+        sent_message = await message.reply_text(chunks[-1], reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
         last_msg_id = sent_message.message_id
 
         # Update the last sent message ID in the chat data
@@ -101,7 +95,6 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Update the last message ID in the chat data
     context.chat_data["Bard"]["drafts"]["last_msg_id"] = last_msg_id
-
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
