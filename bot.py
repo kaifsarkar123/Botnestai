@@ -75,7 +75,7 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # Find the index of the last full stop within the first 1000 characters
-    last_full_stop_index = response_text[:1000].rfind('.')
+    last_full_stop_index = response_text[:4096].rfind('.')
     
     # Cut the response at the last full stop within the first 1000 characters
     truncated_response = response_text[:last_full_stop_index + 1]
