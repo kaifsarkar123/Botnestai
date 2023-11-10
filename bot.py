@@ -159,7 +159,7 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if input_text == "":
         return await update.message.reply_text("❌ Empty message.")
-    message = await update.message.reply_text("✏️")
+    m=await message.reply_sticker("CAACAgIAAxkBAAEnjMFlTl6pcMJDvFHvD2YeoTkQRxs_NQACIAAD9wLID1KiROfjtgxPMwQ")
     context.chat_data[mode]["last_input"] = input_text
     context.chat_data[mode]["last_msg_id"] = message.message_id
 
