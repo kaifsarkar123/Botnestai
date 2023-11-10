@@ -74,12 +74,13 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     last_msg_id = None
 
     try:
-        for chunk in chunks[:-1]:  # Exclude the last chunk
-            sent_message = await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+        # Update the emoji message with the first chunk
+        emoji_message = await message.edit_text(chunks[0], parse_mode=ParseMode.MARKDOWN_V2)
 
-        # Send the last chunk with buttons
-        sent_message = await message.reply_text(chunks[-1], reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
-        last_msg_id = sent_message.message_id
+        for chunk in chunks[1:]:
+            # Send subsequent chunks as separate messages
+            sent_message = await message.reply_text(chunk, reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
+            last_msg_id = sent_message.message_id
 
         # Update the last sent message ID in the chat data
         context.chat_data["Bard"]["drafts"]["message"] = sent_message
@@ -95,7 +96,6 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Update the last message ID in the chat data
     context.chat_data["Bard"]["drafts"]["last_msg_id"] = last_msg_id
-
 
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
