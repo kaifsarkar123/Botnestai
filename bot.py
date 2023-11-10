@@ -66,10 +66,22 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         r"[\_\*\[\]\(\)\~\`\>\#\+\-\=\|\{\}\.\!]", lambda x: f"\\{x.group(0)}", sources
     )
 
-    response_text = f"{_content[: 4096 - len(_sources)]}{_sources}"
+    # Combine content and sources
+    response_text = f"{_content}{_sources}"
 
-    # Split the response into messages with a maximum of 4096 characters
-    chunks = [response_text[i:i + 2048] for i in range(0, len(response_text), 2048)]
+    # Ensure the response is at least 1000 characters
+    if len(response_text) < 1000:
+        await message.edit_text(response_text, parse_mode=ParseMode.MARKDOWN_V2)
+        return
+
+    # Find the index of the last full stop within the first 1000 characters
+    last_full_stop_index = response_text[:1000].rfind('.')
+    
+    # Cut the response at the last full stop within the first 1000 characters
+    truncated_response = response_text[:last_full_stop_index + 1]
+
+    # Split the truncated response into messages with a maximum of 2048 characters
+    chunks = [truncated_response[i:i + 2048] for i in range(0, len(truncated_response), 2048)]
 
     try:
         # Update the "Thinking..." message with the first chunk
@@ -83,10 +95,11 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if str(e).startswith("Message is not modified"):
             pass
         elif str(e).startswith("Can't parse entities"):
-            await message.reply_text(f"{response_text[:4095]}.")
+            await message.reply_text(f"{truncated_response[:4095]}...")
         else:
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
+
 
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
