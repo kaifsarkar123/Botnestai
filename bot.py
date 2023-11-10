@@ -1,6 +1,7 @@
 from re import sub
 from urllib.parse import quote
 from tempfile import NamedTemporaryFile
+from telegram.ext import CallbackQueryHandler
 
 from telegram import Update
 from telegram.constants import ParseMode
