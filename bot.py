@@ -121,21 +121,33 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Get the photo file ID
-    file_id = update.message.photo[-1].file_id
+    try:
+        # Assuming request_response is an object containing image_url and request attributes
+        request_response = ...
 
-    # Get the file path
-    file_path = await context.bot.get_file(file_id).download()
+        image_bytes = None
+        if request_response.image_url:
+            print("Downloading user image")
+            image_bytes = requests.get(request_response.image_url, timeout=120).content
 
-    # Read the image file
-    with open(file_path, 'rb') as image_file:
-        image = image_file.read()
+        # Ask Bard
+        print("Asking Bard...")
+        bard_response = self._chatbot.get_answer(request_response.request, image=image_bytes)
 
-    # Use Bard to analyze the image
-    bard_answer = bard.ask_about_image('What is in the image?', image)
+        # Check response
+        if not bard_response or len(bard_response) < 1 or "content" not in bard_response:
+            raise Exception("Wrong Bard response!")
 
-    # Send the Bard's answer as a text message
-    await update.message.reply_text(bard_answer['content'])
+        # Send Bard's response as a text message
+        await update.message.reply_text(bard_response["content"])
+
+    
+    except Exception as e:
+        print(f"Error handling image: {e}")
+        await update.message.reply_text("❌ Error occurred while processing the image. /reset")
+
+# Add the handler to your existing code
+handler_list.append(MessageHandler(Filters.PHOTO, handle_image))
 
 
 
