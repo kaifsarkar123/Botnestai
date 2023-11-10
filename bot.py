@@ -1,13 +1,18 @@
 from re import sub
 from urllib.parse import quote
-from tempfile import NamedTemporaryFile
-from telegram.ext import CallbackQueryHandler
 
-from telegram import Update
+from telegram import (
+    BotCommand,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    InputMediaPhoto,
+    Update,
+)
 from telegram.constants import ParseMode
 from telegram.ext import (
     Application,
     ApplicationBuilder,
+    CallbackQueryHandler,
     CommandHandler,
     ContextTypes,
     MessageHandler,
@@ -51,7 +56,7 @@ async def view_other_drafts(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Google bard: response
 async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = context.chat_data["Bard"]["session"]
-    message, sources, choices, index = context.chat_data["Bard"]["drafts"].values()
+    message, markup, sources, choices, index = context.chat_data["Bard"]["drafts"].values()
     session.client.choice_id = choices[index]["id"]
     content = choices[index]["content"][0]
     _content = sub(
@@ -61,25 +66,27 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         r"[\_\*\[\]\(\)\~\`\>\#\+\-\=\|\{\}\.\!]", lambda x: f"\\{x.group(0)}", sources
     )
 
-    response_text = f"{_content[: 4000 - len(_sources)]}{_sources}"
+    response_text = f"{_content[: 4096 - len(_sources)]}{_sources}"
+
+    # Split the response into messages with a maximum of 4000 characters
+    chunks = [response_text[i:i + 3202] for i in range(0, len(response_text), 3202)]
 
     try:
-        # Send the response as text
-        await message.reply_text(response_text, parse_mode=ParseMode.MARKDOWN_V2)
+        # Update the "Thinking..." message with the first chunk
+        await message.edit_text(chunks[0], parse_mode=ParseMode.MARKDOWN_V2)
 
-        # Generate audio from the response
-        audio = bard.speech(response_text)
-        
-        # Save audio to a temporary file
-        with NamedTemporaryFile(suffix=".ogg", delete=False) as audio_file:
-            audio_file.write(bytes(audio['audio']))
-
-        # Send the voice file
-        await message.reply_audio(audio_file.name)
+        # Send the remaining chunks without the buttons
+        for chunk in chunks[1:]:
+            await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
 
     except Exception as e:
-        print(f"[e] {e}")
-        await message.reply_text(f"❌ Error occurred: {e}. /reset")
+        if str(e).startswith("Message is not modified"):
+            pass
+        elif str(e).startswith("Can't parse entities"):
+            await message.reply_text(f"{response_text[:4095]}.")
+        else:
+            print(f"[e] {e}")
+            await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
