@@ -43,17 +43,6 @@ async def reset_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # Google bard: view other drafts
-async def view_other_drafts(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    last_msg_id = context.chat_data["Bard"].get("last_msg_id")
-    if last_msg_id is not None and update.callback_query.data == f"{last_msg_id}":
-        # increase choice index
-        context.chat_data["Bard"]["drafts"]["index"] = (
-            context.chat_data["Bard"]["drafts"]["index"] + 1
-        ) % len(context.chat_data["Bard"]["drafts"]["choices"])
-        await bard_response(update, context)
-
-
-# Google bard: response
 async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = context.chat_data["Bard"]["session"]
     message, markup, sources, choices, index = context.chat_data["Bard"]["drafts"].values()
@@ -66,7 +55,7 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         r"[\_\*\[\]\(\)\~\`\>\#\+\-\=\|\{\}\.\!]", lambda x: f"\\{x.group(0)}", sources
     )
 
-    response_text = f"{_content[: 4096 - len(_sources)]}{_sources}"
+    response_text = f"{_content}{_sources}"
 
     # Split the response into messages with a maximum of 4000 characters
     chunks = [response_text[i:i + 4000] for i in range(0, len(response_text), 4000)]
@@ -74,9 +63,12 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     last_msg_id = None
 
     try:
-        for chunk in chunks:
-            sent_message = await message.reply_text(chunk, reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
-            last_msg_id = sent_message.message_id
+        for chunk in chunks[:-1]:
+            sent_message = await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+
+        # Send the last chunk with buttons
+        sent_message = await message.reply_text(chunks[-1], reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
+        last_msg_id = sent_message.message_id
 
         # Update the last sent message ID in the chat data
         context.chat_data["Bard"]["drafts"]["message"] = sent_message
@@ -85,14 +77,13 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if str(e).startswith("Message is not modified"):
             pass
         elif str(e).startswith("Can't parse entities"):
-            await message.reply_text(f"{response_text[:4095]}.")
+            await message.reply_text(f"{response_text[:4095]}...", parse_mode=ParseMode.MARKDOWN_V2)
         else:
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
     # Update the last message ID in the chat data
     context.chat_data["Bard"]["drafts"]["last_msg_id"] = last_msg_id
-
 
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
