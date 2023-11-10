@@ -69,7 +69,7 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response_text = f"{_content[: 4096 - len(_sources)]}{_sources}"
 
     # Split the response into messages with a maximum of 3000 characters
-    chunks = [response_text[i:i + 4000] for i in range(0, len(response_text), 4000)]
+    chunks = [response_text[i:i + 3000] for i in range(0, len(response_text), 3000)]
 
     last_msg_id = None
 
