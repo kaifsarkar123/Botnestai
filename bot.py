@@ -68,8 +68,11 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     response_text = f"{_content[: 4096 - len(_sources)]}{_sources}"
 
-    # Split the response into messages with a maximum of 4000 characters
-    chunks = [response_text[i:i + 3202] for i in range(0, len(response_text), 3202)]
+    # Calculate the remaining characters after the initial edit
+    remaining_chars = 4096 - len(chunks[0])
+
+    # Split the response into messages with a maximum of remaining characters
+    chunks = [response_text[i:i + remaining_chars] for i in range(0, len(response_text), remaining_chars)]
 
     try:
         # Update the "Thinking..." message with the first chunk
