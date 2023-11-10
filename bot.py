@@ -74,9 +74,12 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     last_msg_id = None
 
     try:
-        for chunk in chunks:
-            sent_message = await message.reply_text(chunk, reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
-            last_msg_id = sent_message.message_id
+        for chunk in chunks[:-1]:  # Exclude the last chunk
+            sent_message = await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+
+        # Send the last chunk with buttons
+        sent_message = await message.reply_text(chunks[-1], reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
+        last_msg_id = sent_message.message_id
 
         # Update the last sent message ID in the chat data
         context.chat_data["Bard"]["drafts"]["message"] = sent_message
@@ -85,13 +88,14 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if str(e).startswith("Message is not modified"):
             pass
         elif str(e).startswith("Can't parse entities"):
-            await message.reply_text(f"{response_text[:4095]}.", reply_markup=markup)
+            await message.reply_text(f"{response_text[:4095]}.")
         else:
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
     # Update the last message ID in the chat data
     context.chat_data["Bard"]["drafts"]["last_msg_id"] = last_msg_id
+
 
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
