@@ -68,24 +68,16 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     response_text = f"{_content[: 4096 - len(_sources)]}{_sources}"
 
-    # Split the response into messages with a maximum of 3000 characters
+    # Split the response into messages with a maximum of 4000 characters
     chunks = [response_text[i:i + 3500] for i in range(0, len(response_text), 3500)]
 
-    last_msg_id = None
-
     try:
-        for idx, chunk in enumerate(chunks[:-1]):  # Exclude the last chunk
-            if idx == len(chunks) - 2:  # Include buttons only in the last but one chunk
-                sent_message = await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
-            else:
-                sent_message = await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+        # Update the "Thinking..." message with the first chunk
+        await message.edit_text(chunks[0], parse_mode=ParseMode.MARKDOWN_V2)
 
-        # Send the last chunk with buttons
-        sent_message = await message.reply_text(chunks[-1], reply_markup=markup, parse_mode=ParseMode.MARKDOWN_V2)
-        last_msg_id = sent_message.message_id
-
-        # Update the last sent message ID in the chat data
-        context.chat_data["Bard"]["drafts"]["message"] = sent_message
+        # Send the remaining chunks without the buttons
+        for chunk in chunks[1:]:
+            await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
 
     except Exception as e:
         if str(e).startswith("Message is not modified"):
@@ -95,9 +87,6 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
-
-    # Update the last message ID in the chat data
-    context.chat_data["Bard"]["drafts"]["last_msg_id"] = last_msg_id
 
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
