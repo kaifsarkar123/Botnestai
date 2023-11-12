@@ -60,9 +60,6 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session.client.choice_id = choices[index]["id"]
     content = choices[index]["content"][0]
     
-    content = sub(r'\*|/#*', '', content)
-    content = content.strip()
-
     
     _content = sub(
         r"[\_\*\[\]\(\)\~\>\#\+\-\=\|\{\}\.\!]", lambda x: f"\\{x.group(0)}", content
