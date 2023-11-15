@@ -1,3 +1,7 @@
+import os
+import tempfile
+import pyttsx3
+from telegram import InputFile
 from re import sub
 from urllib.parse import quote
 
@@ -115,6 +119,20 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
+
+async def tts_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    mode, session = get_session(update, context)
+    last_input = context.chat_data[mode].get("last_input")
+    if last_input:
+        temp_file_path = os.path.join(tempfile.gettempdir(), "tts_audio.ogg")
+        engine = pyttsx3.init()
+        engine.save_to_file(last_input, temp_file_path)
+        engine.runAndWait()
+
+        audio_file = InputFile(temp_file_path)
+        await update.message.reply_voice(voice=audio_file)
+
+
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
     if update.message.chat.type != "private":
@@ -215,8 +233,8 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [
                 [
                     InlineKeyboardButton(
-                        text="📝 View other drafts",
-                        callback_data=f"{message.message_id}",
+                        text="TTS",
+                        callback_data="tts_button",
                     ),
                     InlineKeyboardButton(text="🔍 Google it", url=search_url),
                 ]
@@ -422,6 +440,7 @@ def run_bot():
         CommandHandler("cutoff", change_cutoff, user_filter),
         MessageHandler(user_filter & msg_filter, recv_msg),
         CallbackQueryHandler(view_other_drafts),
+        CallbackQueryHandler(tts_button, pattern='^tts_button$'),
     ]
     for handler in handler_list:
         application.add_handler(handler)
