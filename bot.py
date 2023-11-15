@@ -409,7 +409,7 @@ def run_bot():
         CommandHandler("cutoff", change_cutoff, user_filter),
         MessageHandler(user_filter & msg_filter, recv_msg),
         CallbackQueryHandler(view_other_drafts),
-        CallbackQueryHandler(tts_button, pattern='^tts_button$'),
+        CallbackQueryHandler(tts_button, pattern='^tts_button$')
     ]
     for handler in handler_list:
         application.add_handler(handler)
