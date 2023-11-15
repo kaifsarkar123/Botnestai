@@ -60,64 +60,33 @@ async def view_other_drafts(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Google bard: response
 async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = context.chat_data["Bard"]["session"]
-    message, markup, sources, choices, index = context.chat_data["Bard"]["drafts"].values()
+    message, markup, sources, choices, index = context.chat_data["Bard"][
+        "drafts"
+    ].values()
     session.client.choice_id = choices[index]["id"]
     content = choices[index]["content"][0]
-    
-    
     _content = sub(
         r"[\_\*\[\]\(\)\~\>\#\+\-\=\|\{\}\.\!]", lambda x: f"\\{x.group(0)}", content
     ).replace("\\*\\*", "*")
     _sources = sub(
         r"[\_\*\[\]\(\)\~\`\>\#\+\-\=\|\{\}\.\!]", lambda x: f"\\{x.group(0)}", sources
     )
-
-    # Combine content and sources
-    response_text = f"{_content}{_sources}"
-
-    # Ensure the response is at least 1000 characters
-    if len(response_text) < 4096:
-        await message.edit_text(response_text, parse_mode=ParseMode.MARKDOWN_V2)
-        return
-
-    # Find the index of the last full stop within the first 1000 characters
-    last_full_stop_index = response_text[:4096].rfind('.')
-    
-    # Cut the response at the last full stop within the first 1000 characters
-    truncated_response = response_text[:last_full_stop_index + 1]
-
-    # Split the truncated response into messages with a maximum of 2048 characters
-    chunks = [truncated_response[i:i + 3000] for i in range(0, len(truncated_response), 3000)]
-
     try:
-        # Update the "Thinking..." message with the first chunk
-        await message.edit_text(chunks[0], parse_mode=ParseMode.MARKDOWN_V2)
-
-        # Send the remaining chunks without the buttons
-        for chunk in chunks[1:]:
-            await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
-
+        await message.edit_text(
+            f"{_content[: 4096 - len(_sources)]}{_sources}",
+            reply_markup=markup,
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
     except Exception as e:
         if str(e).startswith("Message is not modified"):
             pass
         elif str(e).startswith("Can't parse entities"):
-            await message.reply_text(f"{truncated_response[:4095]}...")
+            await message.edit_text(
+                f"{content[: 4095 - len(sources)]}.{sources}", reply_markup=markup
+            )
         else:
             print(f"[e] {e}")
-            await message.reply_text(f"❌ Error occurred: {e}. /reset")
-
-        # Send the remaining chunks without the buttons
-        for chunk in chunks[1:]:
-            await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
-
-    except Exception as e:
-        if str(e).startswith("Message is not modified"):
-            pass
-        elif str(e).startswith("Can't parse entities"):
-            await message.reply_text(f"{truncated_response[:4095]}...")
-        else:
-            print(f"[e] {e}")
-            await message.reply_text(f"❌ Error occurred: {e}. /reset")
+            await message.edit_text(f"❌ Error orrurred: {e}. /reset")
 
 
 async def tts_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
