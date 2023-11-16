@@ -422,8 +422,7 @@ def run_bot():
         .build()
     )
 
-    user_filter = filters.Chat(chat_id=user_ids)
-    msg_filter = filters.TEXT
+    
 
     handler_list = [
         CommandHandler("id", send_id),
