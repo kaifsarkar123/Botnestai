@@ -365,15 +365,19 @@ async def change_cutoff(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def start_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_strs = [
-        "Welcome to <b>Claude & Bard Telegram Bot</b>",
+        "🎵 **Introducing Bard On Telegram 🌟**",
         "",
-        "Commands:",
-        "• /id to get your chat identifier",
-        "• /reset to reset the chat history",
-        "• /retry to regenerate the answer",
-        "• /seg to send message in segments",
-        "• /mode to switch between Claude & Bard",
-        "• /settings to show Claude & Bard settings",
+        "Features:",
+        "🤖 Provides Assistance.",
+        "🌐 Internet Access.",
+        "🖼 Sends Images.",
+        "💸 Free to use!",
+        "",
+        "📲💬 If you find any problem regarding this bot, please contact me!",
+        "",
+        "start the conversation by typing \"Hi\"",
+        "",
+        f"Developer: @kaifsarkar456",
     ]
     print(f"[i] {update.effective_user.username} started the bot")
     await update.message.reply_text("\n".join(welcome_strs), parse_mode=ParseMode.HTML)
