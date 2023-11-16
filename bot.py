@@ -422,7 +422,8 @@ def run_bot():
         .build()
     )
 
-    
+    user_filter = filters.Chat(chat_id=[])
+    msg_filter = filters.TEXT
 
     handler_list = [
         CommandHandler("id", send_id),
@@ -434,7 +435,7 @@ def run_bot():
         CommandHandler("model", change_model, user_filter),
         CommandHandler("temp", change_temperature, user_filter),
         CommandHandler("cutoff", change_cutoff, user_filter),
-        MessageHandler(recv_msg),
+        MessageHandler(user_filter & msg_filter, recv_msg),
         CallbackQueryHandler(view_other_drafts),
     ]
     for handler in handler_list:
