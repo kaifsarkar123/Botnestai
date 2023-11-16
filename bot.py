@@ -435,7 +435,7 @@ def run_bot():
         CommandHandler("model", change_model, user_filter),
         CommandHandler("temp", change_temperature, user_filter),
         CommandHandler("cutoff", change_cutoff, user_filter),
-        MessageHandler(msg_filter, recv_msg),
+        MessageHandler(recv_msg),
         CallbackQueryHandler(view_other_drafts),
     ]
     for handler in handler_list:
