@@ -65,7 +65,6 @@ async def view_other_drafts(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Google bard: response
 async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
-async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = context.chat_data["Bard"]["session"]
     message, markup, sources, choices, index = context.chat_data["Bard"][
         "drafts"
@@ -95,7 +94,7 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"[e] {e}")
             await message.edit_text(f"❌ Error orrurred: {e}. /reset")
 
-def tts_callback(update, context):
+async def tts_callback(update, context):
         send_chat_action(update, context, ChatAction.RECORD_AUDIO)
         query = update.callback_query
         tts(user_id)
@@ -108,7 +107,7 @@ def tts_callback(update, context):
     dispatcher.add_handler(CallbackQueryHandler(tts_callback, pattern='^tts$'))
 
 
-def tts(user_id):
+async def tts(user_id):
     latest_message = message[user_id]
     logging.info(f"Generating tts")
     if latest_message[0] is not None:
