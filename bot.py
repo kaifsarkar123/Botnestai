@@ -82,6 +82,9 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Cut the response at the last full stop within the first 1000 characters
     truncated_response = response_text[:last_full_stop_index + 1]
 
+    # Check if the response is actually cut
+    is_cut = len(truncated_response) < len(response_text)
+    
     # Split the truncated response into messages with a maximum of 2048 characters
     chunks = [truncated_response[i:i + 3000] for i in range(0, len(truncated_response), 3000)]
 
@@ -92,6 +95,10 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Send the remaining chunks without the buttons
         for chunk in chunks[1:]:
             await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+
+    # Send cutoff notification if the response is cut
+        if is_cut:
+            await message.reply_text("🔍 The response is too long, so the rest has been cutoff.")
 
     except Exception as e:
         if str(e).startswith("Message is not modified"):
