@@ -103,9 +103,6 @@ async def tts_callback(update, context):
         os.remove('voice.mp3')
         logging.info(f"tts send")
 
-    # Add a callback handler for the "tts" button
-    dispatcher.add_handler(CallbackQueryHandler(tts_callback, pattern='^tts$'))
-
 
 async def tts(user_id):
     latest_message = message[user_id]
@@ -440,6 +437,7 @@ def run_bot():
         CommandHandler("cutoff", change_cutoff, user_filter),
         MessageHandler(user_filter & msg_filter, recv_msg),
         CallbackQueryHandler(view_other_drafts),
+        CallbackQueryHandler(tts_callback, pattern='^tts$'),
     ]
     for handler in handler_list:
         application.add_handler(handler)
