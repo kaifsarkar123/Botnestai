@@ -98,7 +98,7 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Send cutoff notification if the response is cut
         if is_cut:
-            await message.reply_text("🔍 The response is too long, so the rest has been cutoff.")
+            await message.reply_text("⚠️ The response has been shortened as it exceeded the maximum length.")
 
     except Exception as e:
         if str(e).startswith("Message is not modified"):
