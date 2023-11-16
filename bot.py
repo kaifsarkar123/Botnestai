@@ -402,12 +402,8 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def post_init(application: Application):
     await application.bot.set_my_commands(
         [
-            BotCommand("/reset", "Reset the chat history"),
+            BotCommand("/start", "Starts the bot"),
             BotCommand("/retry", "Regenerate the answer"),
-            BotCommand("/seg", "Send message in segments"),
-            BotCommand("/mode", "Switch between Claude & Bard"),
-            BotCommand("/settings", "Show Claude & Bard settings"),
-            BotCommand("/help", "Get help message"),
         ]
     )
 
@@ -422,7 +418,7 @@ def run_bot():
         .build()
     )
 
-    user_filter = filters.Chat(chat_id=[])
+    user_filter = filters.Chat(chat_id=user_ids)
     msg_filter = filters.TEXT
 
     handler_list = [
