@@ -368,16 +368,20 @@ async def start_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🎵 **Introducing Bard On Telegram 🌟**",
         "",
         "Features:",
+        
         "🤖 Provides Assistance.",
+        
         "🌐 Internet Access.",
+        
         "🖼 Sends Images.",
+        
         "💸 Free to use!",
         "",
         "📲💬 If you find any problem regarding this bot, please contact me!",
         "",
         "Start the conversation by typing \"Hi\"",
         "",
-        "<b>Developer:</b> <a href="https://t.me/kaifsarkar53">KAIF</a>",
+        "[kaif sarkar](https://t.me/kaifsarkar53)",
     ]
     print(f"[i] {update.effective_user.username} started the bot")
     await update.message.reply_text("\n".join(welcome_strs), parse_mode=ParseMode.HTML)
