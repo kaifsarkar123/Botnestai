@@ -1,5 +1,15 @@
+import os
+import logging
+import asyncio
+import telegram
+import requests
+import sys
+import re
+
 from re import sub
 from urllib.parse import quote
+from pydub import AudioSegment
+from gtts import gTTS
 
 from telegram import (
     BotCommand,
@@ -115,6 +125,46 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
+
+def tts_callback(update, context):
+        send_chat_action(update, context, ChatAction.RECORD_AUDIO)
+        query = update.callback_query
+        tts(user_id)
+        send_chat_action(update, context, ChatAction.UPLOAD_AUDIO)
+        context.bot.send_voice(chat_id=query.message.chat_id, voice=open('voice.mp3', 'rb'))
+        os.remove('voice.mp3')
+        logging.info(f"tts send")
+
+    # Add a callback handler for the "tts" button
+    dispatcher.add_handler(CallbackQueryHandler(tts_callback, pattern='^tts$'))
+
+
+def tts(user_id):
+    latest_message = message[user_id]
+    logging.info(f"Generating tts")
+    if latest_message[0] is not None:
+        if latest_message[1] is not None:
+            if latest_message[1] != 'en':
+                user_lang = latest_message[1]
+                text = latest_message[0]
+                tts = gTTS(text=text, lang=user_lang, slow=False)
+            else:
+                text = latest_message[0]
+                tts = gTTS(text=text, lang='en', tld='co.uk', slow=False)
+        else:
+            text = latest_message[0]
+            tts = gTTS(text=text,lang='en', tld='co.uk', slow=False)
+    if latest_message[0] is None:
+        text = "There has been no response at the moment."
+        tts = gTTS(text=text, lang='en', tld='co.uk', slow=False)
+    tts.save('response.mp3')
+    audio = AudioSegment.from_file("response.mp3", format="mp3")
+    audio = audio.speedup(playback_speed=1.22)
+    audio.export("voice.mp3", format="mp3")
+    os.remove('response.mp3')
+    logging.info(f"tts done processing")
+
+
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
     if update.message.chat.type != "private":
@@ -215,8 +265,8 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [
                 [
                     InlineKeyboardButton(
-                        text="📝 View other drafts",
-                        callback_data=f"{message.message_id}",
+                        text="TTS",
+                        callback_data="tts",
                     ),
                     InlineKeyboardButton(text="🔍 Google it", url=search_url),
                 ]
