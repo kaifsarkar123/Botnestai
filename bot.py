@@ -381,7 +381,7 @@ async def start_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "",
         "Start the conversation by typing \"Hi\"",
         "",
-        "Developer:<a href="https://t.me/kaifsarkar53">kaif</a>",
+        "Developer: @kaifsarkar53",
     ]
     print(f"[i] {update.effective_user.username} started the bot")
     await update.message.reply_text("\n".join(welcome_strs), parse_mode=ParseMode.HTML)
