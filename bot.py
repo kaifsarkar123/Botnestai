@@ -1,15 +1,5 @@
-import os
-import logging
-import asyncio
-import telegram
-import requests
-import sys
-import re
-
 from re import sub
 from urllib.parse import quote
-from pydub import AudioSegment
-from gtts import gTTS
 
 from telegram import (
     BotCommand,
@@ -66,69 +56,64 @@ async def view_other_drafts(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Google bard: response
 async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = context.chat_data["Bard"]["session"]
-    message, markup, sources, choices, index = context.chat_data["Bard"][
-        "drafts"
-    ].values()
+    message, markup, sources, choices, index = context.chat_data["Bard"]["drafts"].values()
     session.client.choice_id = choices[index]["id"]
     content = choices[index]["content"][0]
+    
+    
     _content = sub(
         r"[\_\*\[\]\(\)\~\>\#\+\-\=\|\{\}\.\!]", lambda x: f"\\{x.group(0)}", content
     ).replace("\\*\\*", "*")
     _sources = sub(
         r"[\_\*\[\]\(\)\~\`\>\#\+\-\=\|\{\}\.\!]", lambda x: f"\\{x.group(0)}", sources
     )
+
+    # Combine content and sources
+    response_text = f"{_content}{_sources}"
+
+    # Ensure the response is at least 1000 characters
+    if len(response_text) < 4096:
+        await message.edit_text(response_text, parse_mode=ParseMode.MARKDOWN_V2)
+        return
+
+    # Find the index of the last full stop within the first 1000 characters
+    last_full_stop_index = response_text[:4096].rfind('.')
+    
+    # Cut the response at the last full stop within the first 1000 characters
+    truncated_response = response_text[:last_full_stop_index + 1]
+
+    # Split the truncated response into messages with a maximum of 2048 characters
+    chunks = [truncated_response[i:i + 3000] for i in range(0, len(truncated_response), 3000)]
+
     try:
-        await message.edit_text(
-            f"{_content[: 4096 - len(_sources)]}{_sources}",
-            reply_markup=markup,
-            parse_mode=ParseMode.MARKDOWN_V2,
-        )
+        # Update the "Thinking..." message with the first chunk
+        await message.edit_text(chunks[0], parse_mode=ParseMode.MARKDOWN_V2)
+
+        # Send the remaining chunks without the buttons
+        for chunk in chunks[1:]:
+            await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
+
     except Exception as e:
         if str(e).startswith("Message is not modified"):
             pass
         elif str(e).startswith("Can't parse entities"):
-            await message.edit_text(
-                f"{content[: 4095 - len(sources)]}.{sources}", reply_markup=markup
-            )
+            await message.reply_text(f"{truncated_response[:4095]}...")
         else:
             print(f"[e] {e}")
-            await message.edit_text(f"❌ Error orrurred: {e}. /reset")
+            await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
-async def tts_callback(update, context):
-        send_chat_action(update, context, ChatAction.RECORD_AUDIO)
-        query = update.callback_query
-        tts(user_id)
-        send_chat_action(update, context, ChatAction.UPLOAD_AUDIO)
-        context.bot.send_voice(chat_id=query.message.chat_id, voice=open('voice.mp3', 'rb'))
-        os.remove('voice.mp3')
-        logging.info(f"tts send")
+        # Send the remaining chunks without the buttons
+        for chunk in chunks[1:]:
+            await message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN_V2)
 
-
-async def tts(user_id):
-    latest_message = message[user_id]
-    logging.info(f"Generating tts")
-    if latest_message[0] is not None:
-        if latest_message[1] is not None:
-            if latest_message[1] != 'en':
-                user_lang = latest_message[1]
-                text = latest_message[0]
-                tts = gTTS(text=text, lang=user_lang, slow=False)
-            else:
-                text = latest_message[0]
-                tts = gTTS(text=text, lang='en', tld='co.uk', slow=False)
+    except Exception as e:
+        if str(e).startswith("Message is not modified"):
+            pass
+        elif str(e).startswith("Can't parse entities"):
+            await message.reply_text(f"{truncated_response[:4095]}...")
         else:
-            text = latest_message[0]
-            tts = gTTS(text=text,lang='en', tld='co.uk', slow=False)
-    if latest_message[0] is None:
-        text = "There has been no response at the moment."
-        tts = gTTS(text=text, lang='en', tld='co.uk', slow=False)
-    tts.save('response.mp3')
-    audio = AudioSegment.from_file("response.mp3", format="mp3")
-    audio = audio.speedup(playback_speed=1.22)
-    audio.export("voice.mp3", format="mp3")
-    os.remove('response.mp3')
-    logging.info(f"tts done processing")
-
+            print(f"[e] {e}")
+            await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
@@ -230,8 +215,8 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [
                 [
                     InlineKeyboardButton(
-                        text="TTS",
-                        callback_data="tts",
+                        text="📝 View other drafts",
+                        callback_data=f"{message.message_id}",
                     ),
                     InlineKeyboardButton(text="🔍 Google it", url=search_url),
                 ]
@@ -437,7 +422,6 @@ def run_bot():
         CommandHandler("cutoff", change_cutoff, user_filter),
         MessageHandler(user_filter & msg_filter, recv_msg),
         CallbackQueryHandler(view_other_drafts),
-        CallbackQueryHandler(tts_callback, pattern='^tts$'),
     ]
     for handler in handler_list:
         application.add_handler(handler)
