@@ -1,5 +1,6 @@
 from re import sub
 from urllib.parse import quote
+from telegram import types
 
 from telegram import (
     BotCommand,
