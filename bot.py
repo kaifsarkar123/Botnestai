@@ -17,7 +17,6 @@ from telegram.ext import (
     ContextTypes,
     MessageHandler,
     filters,
-    types,
 )
 
 from config import bot_token, default_mode, single_mode, user_ids
@@ -123,7 +122,7 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
-async def what_is_image(message: types.Message, state: FSMContext):
+async def what_is_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if message.reply_to_message and message.reply_to_message.photo:
         file_id = message.reply_to_message.photo[-1].file_id
         file_info = await bot.get_file(file_id)
