@@ -133,6 +133,7 @@ async def what_is_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await message.reply_text("Please reply to my post with an image first!")
 
 
+@bot.message_handler(filters.TEXT)
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
     if update.message.chat.type != "private":
