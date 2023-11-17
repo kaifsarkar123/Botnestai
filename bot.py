@@ -134,7 +134,7 @@ async def what_is_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 @bot.message_handler(filters.TEXT)
-async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
     if update.message.chat.type != "private":
         if (
