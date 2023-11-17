@@ -1,6 +1,5 @@
 from re import sub
 from urllib.parse import quote
-from telegram import types
 
 from telegram import (
     BotCommand,
@@ -18,6 +17,7 @@ from telegram.ext import (
     ContextTypes,
     MessageHandler,
     filters,
+    types,
 )
 
 from config import bot_token, default_mode, single_mode, user_ids
