@@ -91,7 +91,6 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         # Update the "Thinking..." message with the first chunk
-        thinking_message = await message.edit_text("🤖 Thinking...", parse_mode=ParseMode.MARKDOWN_V2)
         await message.edit_text(chunks[0], parse_mode=ParseMode.MARKDOWN_V2)
 
         # Send the remaining chunks without the buttons
