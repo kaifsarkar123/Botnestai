@@ -185,7 +185,7 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.edit_message_text(
             chat_id=update.effective_chat.id,
             message_id=message.message_id,
-            text="*Getting the responsefrom the server.*",
+            text="*Getting the response from the server.*",
             parse_mode=ParseMode.MARKDOWN,
     )
     time.sleep(2)
