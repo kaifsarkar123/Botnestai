@@ -182,7 +182,12 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await update.message.reply_text("❌ Empty message.")
     message = await update.message.reply_text("...")
     time.sleep(1)
-    await message.edit_text("<b>Getting response from the server</b>")
+    await context.bot.edit_message_text(
+            chat_id=update.effective_chat.id,
+            message_id=message.message_id,
+            text="*Generating response*",
+            parse_mode=ParseMode.MARKDOWN,
+    )
     time.sleep(2)
     await message.edit_text("Please wait.")
     time.sleep(0)
