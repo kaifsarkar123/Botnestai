@@ -192,7 +192,7 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.edit_message_text(
             chat_id=update.effective_chat.id,
             message_id=message.message_id,
-            text="*Generated successfully. *",
+            text="*Generated successfully updating.*",
             parse_mode=ParseMode.MARKDOWN,
     )
     context.chat_data[mode]["last_input"] = input_text
