@@ -91,6 +91,7 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         # Update the "Thinking..." message with the first chunk
+        await message.edit_text("<b>Please wait.</b>", parse_mode=ParseMode.HTML)
         await message.edit_text(chunks[0], parse_mode=ParseMode.MARKDOWN_V2)
 
         # Send the remaining chunks without the buttons
