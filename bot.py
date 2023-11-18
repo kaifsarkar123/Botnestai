@@ -1,3 +1,4 @@
+import time
 from re import sub
 from urllib.parse import quote
 
