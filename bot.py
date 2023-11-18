@@ -150,6 +150,8 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
     mode, session = get_session(update, context)
 
+     message = await update.message.reply_text("Generating response from the server")
+
     # handle long message (for claude 100k model)
     seg_message = context.chat_data[mode].get("seg_message")
     if seg_message is None:
@@ -179,6 +181,9 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if input_text == "":
         return await update.message.reply_text("❌ Empty message.")
+        # Send the "Please wait" message just before the Bard's response
+    await asyncio.sleep(2)  # Wait for 2 seconds
+    await message.edit_text("Please wait")
     message = await update.message.reply_text("...")
     context.chat_data[mode]["last_input"] = input_text
     context.chat_data[mode]["last_msg_id"] = message.message_id
