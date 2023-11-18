@@ -179,10 +179,8 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if input_text == "":
         return await update.message.reply_text("❌ Empty message.")
-        # Send the "Please wait" message just before the Bard's response
-    await asyncio.sleep(2)  # Wait for 2 seconds
-    await message.edit_text("Please wait")
     message = await update.message.reply_text("...")
+    await message.edit_text("Please wait")
     context.chat_data[mode]["last_input"] = input_text
     context.chat_data[mode]["last_msg_id"] = message.message_id
 
