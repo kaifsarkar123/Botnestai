@@ -185,23 +185,16 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.edit_message_text(
             chat_id=update.effective_chat.id,
             message_id=message.message_id,
-            text="*Generating response*",
+            text="*Getting the responsefrom the server.*",
             parse_mode=ParseMode.MARKDOWN,
     )
     time.sleep(2)
-    await message.edit_text("Please wait.")
-    time.sleep(0)
-    await message.edit_text("Please wait..")
-    time.sleep(0)
-    await message.edit_text("Please wait...")
-    time.sleep(0)
-    await message.edit_text("Please wait.")
-    time.sleep(0)
-    await message.edit_text("Please wait..")
-    time.sleep(0)
-    await message.edit_text("Please wait...")
-    time.sleep(2)
-    await message.edit_text("<b>Message Generated successfully</b>")
+    await context.bot.edit_message_text(
+            chat_id=update.effective_chat.id,
+            message_id=message.message_id,
+            text="*Generated successfully. *",
+            parse_mode=ParseMode.MARKDOWN,
+    )
     context.chat_data[mode]["last_input"] = input_text
     context.chat_data[mode]["last_msg_id"] = message.message_id
 
