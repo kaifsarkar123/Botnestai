@@ -180,7 +180,7 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if input_text == "":
         return await update.message.reply_text("❌ Empty message.")
-    message = await update.message.reply_text_id("...")
+    message = await update.message.reply_text("...")
     time.sleep(1)
     await context.bot.edit_message_text(
             chat_id=update.effective_chat.id,
