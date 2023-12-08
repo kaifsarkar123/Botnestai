@@ -126,17 +126,6 @@ async def bard_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"[e] {e}")
             await message.reply_text(f"❌ Error occurred: {e}. /reset")
 
-async def what_is_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if message.reply_to_message and message.reply_to_message.photo:
-        file_id = message.reply_to_message.photo[-1].file_id
-        file_info = await bot.get_file(file_id)
-        image = await bot.download_file(file_info.file_path)
-        bard_answer = bard.ask_about_image('What is in the image?', image)
-        await message.reply_text(bard_answer['content'])
-    else:
-        await message.reply_text("Please reply to my post with an image first!")
-
-
 async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     input_text = update.message.text
     if update.message.chat.type != "private":
