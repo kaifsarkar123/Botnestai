@@ -22,6 +22,9 @@ from telegram.ext import (
 
 from config import bot_token, default_mode, single_mode, user_ids
 from utils import Session
+from keep_alive import keep_alive
+
+keep_alive()
 
 
 def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -185,14 +188,14 @@ async def recv_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.edit_message_text(
             chat_id=update.effective_chat.id,
             message_id=message.message_id,
-            text="*Getting the response from the server.*",
+            text="*Please wait bard is generating the response.*",
             parse_mode=ParseMode.MARKDOWN,
     )
     time.sleep(2)
     await context.bot.edit_message_text(
             chat_id=update.effective_chat.id,
             message_id=message.message_id,
-            text="*Generated successfully updating.*",
+            text="...",
             parse_mode=ParseMode.MARKDOWN,
     )
     context.chat_data[mode]["last_input"] = input_text
